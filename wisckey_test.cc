@@ -158,10 +158,11 @@ main(int argc, char ** argv)
   clock_t dt = clock() - t0;
   cout << "time elapsed: " << dt * 1.0e-6 << " seconds" << endl;
 
+  // shared by part 2, 3, 4 below to retrive value
+  string val;
   // test part2: get sequential 
   /*
   p1 = nfill/40;
-  string val;
   clock_t t2 = clock();
   for(size_t j = 0; j < nfill; j++){
     string key = keys.at(j);
@@ -179,7 +180,6 @@ main(int argc, char ** argv)
   // test part3: random get
   /*
   p1 = nfill/40;
-  string val;
   clock_t t3 = clock();
   for(size_t j = 0; j < nfill; j++){
     int rand_j = rand() % nfill;
@@ -197,7 +197,6 @@ main(int argc, char ** argv)
 
   // test part4: del seq
   p1 = nfill/40;
-  string val;
   clock_t t4 = clock();
   for(size_t j = 0; j < nfill; j++){
     string key = keys.at(j);
