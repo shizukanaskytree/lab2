@@ -160,6 +160,7 @@ main(int argc, char ** argv)
   cout << "time elapsed: " << dt * 1.0e-6 << " seconds" << endl;
 
   // test part2: get sequential 
+  /*
   p1 = nfill/40;
   string val;
   clock_t t2 = clock();
@@ -174,10 +175,25 @@ main(int argc, char ** argv)
   }
   dt= clock() - t2;
   cout << "time elapsed(get sequencial): " << dt * 1.0e-6 << " seconds" << endl;
+  */
 
   // test part3: random get
-  //
-  //
+  p1 = nfill/40;
+  string val;
+  clock_t t3 = clock();
+  for(size_t j = 0; j < nfill; j++){
+    int rand_j = rand() % nfill;
+    string key = keys.at(rand_j);
+    wisckey_get(wk, key, val);
+    if (j >= p1) {
+      dt = clock() - t3;
+      cout << "progress: " << j+1 << "/" << nfill << " time elapsed: " << dt * 1.0e-6 << endl << std::flush;
+      p1 += (nfill / 40);
+    }
+  }
+  dt= clock() - t3;
+  cout << "time elapsed(get randomly): " << dt * 1.0e-6 << " seconds" << endl;
+
   // test part4: del seq
   //
   //
