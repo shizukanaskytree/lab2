@@ -138,6 +138,8 @@ main(int argc, char ** argv)
   }
   string value = string(vbuf, value_size);
 
+  // add by wxf: store keys for part2 test
+  vector<string> keys;
   size_t nfill = 1000000000 / (value_size + 8);
   clock_t t0 = clock();
   size_t p1 = nfill / 40;
@@ -145,6 +147,7 @@ main(int argc, char ** argv)
     string key = std::to_string(((size_t)rand())*((size_t)rand()));
     // test value
     // cout<< value  <<endl<<std::flush;
+    keys.push_back(key);
     wisckey_set(wk, key, value);
     if (j >= p1) {
       clock_t dt = clock() - t0;
@@ -152,9 +155,34 @@ main(int argc, char ** argv)
       p1 += (nfill / 40);
     }
   }
-  close_wisckey(wk);
+  //close_wisckey(wk);
   clock_t dt = clock() - t0;
   cout << "time elapsed: " << dt * 1.0e-6 << " seconds" << endl;
+
+  // test part2: get sequential 
+  p1 = nfill/40;
+  string val;
+  clock_t t2 = clock();
+  for(size_t j = 0; j < nfill; j++){
+    string key = keys.at(j);
+    wisckey_get(wk, key, val);
+      if (j >= p1) {
+        dt = clock() - t2;
+        cout << "progress: " << j+1 << "/" << nfill << " time elapsed: " << dt * 1.0e-6 << endl << std::flush;
+        p1 += (nfill / 40);
+      }
+  }
+  dt= clock() - t2;
+  cout << "time elapsed(get sequencial): " << dt * 1.0e-6 << " seconds" << endl;
+
+  // test part3: random get
+  //
+  //
+  // test part4: del seq
+  //
+  //
+
+  close_wisckey(wk);
   destroy_leveldb("wisckey_test_dir");
   exit(0);
 }
