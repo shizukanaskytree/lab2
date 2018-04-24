@@ -13,6 +13,30 @@ typedef struct WiscKey {
 wisckey_get(WK * wk, string &key, string &value)
 {
   //TODO: Your code here
+  // 1. go to leveldb get addr of key
+  string s_addr;
+  leveldb_get(wk->leveldb, key, s_addr);
+  int addr = atoi(s_addr.c_str());
+  // 2. according to addr, get value from logfile.txt
+  int cnt = 0;
+  if(wk->logfile != NULL){
+    char line[1024];
+    while( fgets(line, sizeof(line), wk->logfile) != NULL ){
+      // read a line until NO.addr
+      if( cnt == addr ){
+        // get the value
+        std::string val(line);
+	value.assign(val);
+	return true;
+      }else{
+        cnt++;
+      }
+    }
+    return false;
+  }else{
+    printf("wisckey_get:: logfile does not exist! \n");
+    return false;
+  }
 }
 
   static void
@@ -25,32 +49,24 @@ wisckey_set(WK * wk, string &key, string &value)
   // store key and addr
   string s_addr = std::to_string(addr);
   leveldb_set(wk->leveldb, key, s_addr);
-  addr += 1;
+  
+  // addr += 1;
   // write value into logfile.txt
   int cnt = 0;
   if(wk->logfile != NULL){
-    char line[256];
-    while( fgets(line, sizeof line, wk->logfile) != NULL ){
-      // read a line until NO.addr
-      if( cnt == addr ){
-        // write value into file: logfile.txt
-	// convert string to char array
-	const char *val = value.c_str();
-        fputs(val, wk->logfile);
-	fputs("\n", wk->logfile);
-      }else{
-        cnt++;
-      }
-    }
+    fprintf(wk->logfile, "%s\n", value);
   }else{
     printf("logfile does not exist");
   }
+
 }
 
   static void
 wisckey_del(WK * wk, string &key)
 {
   //TODO: Your code here
+  // only del <key, addr>, leave logfile unchanged to GC
+  leveldb_del(wk->leveldb, key);
 }
 
   static WK *
@@ -81,7 +97,6 @@ open_wisckey(const string& dirname)
 
   // assign wk logfile attribute
   wk->logfile = file;
-
   return wk;
 }
 
