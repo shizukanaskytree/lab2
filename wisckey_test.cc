@@ -49,8 +49,7 @@ wisckey_set(WK * wk, string &key, string &value)
   // store key and addr
   string s_addr = std::to_string(addr);
   leveldb_set(wk->leveldb, key, s_addr);
-  
-  // addr += 1;
+  addr += 1;
   // write value into logfile.txt
   int cnt = 0;
   if(wk->logfile != NULL){
@@ -174,10 +173,11 @@ main(int argc, char ** argv)
       }
   }
   dt= clock() - t2;
-  cout << "time elapsed(get sequencial): " << dt * 1.0e-6 << " seconds" << endl;
+  cout << "time elapsed(get sequencially): " << dt * 1.0e-6 << " seconds" << endl;
   */
 
   // test part3: random get
+  /*
   p1 = nfill/40;
   string val;
   clock_t t3 = clock();
@@ -193,10 +193,23 @@ main(int argc, char ** argv)
   }
   dt= clock() - t3;
   cout << "time elapsed(get randomly): " << dt * 1.0e-6 << " seconds" << endl;
+  */
 
   // test part4: del seq
-  //
-  //
+  p1 = nfill/40;
+  string val;
+  clock_t t4 = clock();
+  for(size_t j = 0; j < nfill; j++){
+    string key = keys.at(j);
+    wisckey_del(wk, key);
+    if (j >= p1) {
+      dt = clock() - t4;
+      cout << "progress: " << j+1 << "/" << nfill << " time elapsed: " << dt * 1.0e-6 << endl << std::flush;
+      p1 += (nfill / 40);
+    }
+  }
+  dt= clock() - t4;
+  cout << "time elapsed(del sequencially): " << dt * 1.0e-6 << " seconds" << endl;
 
   close_wisckey(wk);
   destroy_leveldb("wisckey_test_dir");
