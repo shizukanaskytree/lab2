@@ -19,6 +19,32 @@ wisckey_get(WK * wk, string &key, string &value)
 wisckey_set(WK * wk, string &key, string &value)
 {
   //TODO: Your code here
+  // addr use a number to indicate its address
+  // increase it every time when invoking set key
+  static int addr = 0;
+  // store key and addr
+  string s_addr = std::to_string(addr);
+  leveldb_set(wk->leveldb, key, s_addr);
+  addr += 1;
+  // write value into logfile.txt
+  int cnt = 0;
+  if(wk->logfile != NULL){
+    char line[256];
+    while( fgets(line, sizeof line, wk->logfile) != NULL ){
+      // read a line until NO.addr
+      if( cnt == addr ){
+        // write value into file: logfile.txt
+	// convert string to char array
+	const char *val = value.c_str();
+        fputs(val, wk->logfile);
+	fputs("\n", wk->logfile);
+      }else{
+        cnt++;
+      }
+    }
+  }else{
+    printf("logfile does not exist");
+  }
 }
 
   static void
@@ -34,6 +60,28 @@ open_wisckey(const string& dirname)
   wk->leveldb = open_leveldb(dirname);
   wk->dir = dirname;
   //TODO: Your code here: logfile
+  // create file first
+  FILE *file;
+  int file_exists;
+  const char* filename = "logfile.txt";
+  file = fopen(filename, "r");
+  if(file==NULL) file_exists = 0;
+  else {
+    file_exists = 1;
+    fclose(file);
+  }
+  // open file or create it
+  if(file_exists==1){
+    printf("logfile exists, and it is open\n");
+    file = fopen(filename, "a+");
+  }else{
+    printf("logfile does not exist, but it is created now\n");
+    file = fopen(filename, "w+");
+  }
+
+  // assign wk logfile attribute
+  wk->logfile = file;
+
   return wk;
 }
 
@@ -43,6 +91,10 @@ close_wisckey(WK * wk)
   delete wk->leveldb;
   // TODO: Your code here
   // flush and close logfile
+  if(wk->logfile != NULL){
+    printf("close logfile, then close wisckey");
+    fclose(wk->logfile);
+  }
   delete wk;
 }
 
@@ -76,6 +128,8 @@ main(int argc, char ** argv)
   size_t p1 = nfill / 40;
   for (size_t j = 0; j < nfill; j++) {
     string key = std::to_string(((size_t)rand())*((size_t)rand()));
+    // test value
+    // cout<< value  <<endl<<std::flush;
     wisckey_set(wk, key, value);
     if (j >= p1) {
       clock_t dt = clock() - t0;
